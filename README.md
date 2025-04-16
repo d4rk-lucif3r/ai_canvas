@@ -4,6 +4,10 @@ AI Canvas is a web application that allows you to draw on a digital canvas using
 
 **Built with ❤️ by [Ana](https://www.openana.ai)**
 
+**Try it live: [ana-ai-canvas.vercel.app](https://www.ana-ai-canvas.vercel.app)**
+
+> **Privacy Note**: This application processes all hand detection locally in your browser. No data is collected, stored, or transmitted to any server. Your camera feed never leaves your device.
+
 ## Features
 
 - **Hand Gesture Drawing**: Draw by pinching your thumb and index finger together
@@ -13,13 +17,14 @@ AI Canvas is a web application that allows you to draw on a digital canvas using
 - **Smoothing Control**: Adjust the smoothness of your drawing lines
 - **Help Popup**: Interactive guide with instructions on how to use the app
 - **Debug Mode**: Visualize hand landmarks and pinch detection
-- **Responsive Design**: Works on various screen sizes
+- **Desktop-Optimized**: Designed for desktop use with a mobile detection warning
 - **Modern UI**: Sleek dark theme with orange accents
 
 ## How to Use
 
 1. **Open the Application**:
-   - Open `index.html` in a modern web browser (Chrome, Firefox, Edge recommended)
+   - Open `index.html` in a modern web browser on a desktop or laptop (Chrome, Firefox, Edge recommended)
+   - The application is designed for desktop use and will display a warning message on mobile devices
    - Allow camera access when prompted
 
 2. **Drawing**:
@@ -83,3 +88,4 @@ This application uses:
 - Developed by [Ana](https://www.openana.ai)
 - Powered by MediaPipe Hands technology
 - UI design inspired by [openana.ai](https://www.openana.ai)
+- Live demo available at [ana-ai-canvas.vercel.app](https://www.ana-ai-canvas.vercel.app)

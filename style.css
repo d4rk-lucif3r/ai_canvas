@@ -452,6 +452,90 @@ button:active {
     border: 1px solid var(--border-color);
 }
 
+/* Mobile Warning Overlay */
+.mobile-warning {
+    display: none; /* Hidden by default, shown via JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-dark);
+    z-index: 2000;
+    overflow: hidden;
+}
+
+.mobile-warning-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.mobile-header {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.mobile-header .built-with {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.mobile-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.mobile-body h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.mobile-body p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    max-width: 90%;
+    line-height: 1.5;
+    color: var(--text-light);
+}
+
+.mobile-warning-icon {
+    font-size: 5rem;
+    margin: 2rem 0;
+}
+
+.mobile-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.mobile-footer p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.mobile-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.mobile-footer a:hover {
+    text-decoration: underline;
+}
+
 /* Modal Responsive Adjustments */
 @media (max-width: 768px) {
     .modal-content {
@@ -469,5 +553,15 @@ button:active {
     
     .help-image {
         font-size: 2rem;
+    }
+    
+    /* Show mobile warning on small screens */
+    .mobile-warning {
+        display: flex;
+    }
+    
+    /* Hide the main content on mobile */
+    .container, body > .navbar {
+        display: none;
     }
 }

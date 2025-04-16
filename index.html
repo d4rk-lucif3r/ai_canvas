@@ -10,6 +10,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Mobile Warning Overlay -->
+    <div id="mobileWarning" class="mobile-warning">
+        <div class="mobile-warning-content">
+            <div class="mobile-header">
+                <div class="built-with">
+                    Built with <span class="heart">❤️</span> by <span>Ana</span>
+                </div>
+            </div>
+            <div class="mobile-body">
+                <h2>Desktop Only</h2>
+                <p>This application is designed for desktop use only.</p>
+                <p>Please open AI Canvas on a desktop or laptop computer for the best experience.</p>
+                <div class="mobile-warning-icon">💻</div>
+            </div>
+            <div class="mobile-footer">
+                <p>Visit <a href="https://www.openana.ai" target="_blank">openana.ai</a> for more information on Ana.</p>
+            </div>
+        </div>
+    </div>
+    
     <nav class="navbar">
         <div class="built-with">
             Built with <span class="heart">❤️</span> by <span>Ana</span>
@@ -91,5 +111,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     
     <script src="main.js"></script>
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Mobile Detection
+    function isMobileDevice() {
+        return (
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+            (window.innerWidth <= 768)
+        );
+    }
+    
+    // Show mobile warning if on a mobile device
+    const mobileWarning = document.getElementById('mobileWarning');
+    if (isMobileDevice()) {
+        mobileWarning.style.display = 'flex';
+        // Don't initialize the rest of the app on mobile
+        return;
+    }
+    
     // DOM Elements
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('drawingCanvas');
