@@ -4,12 +4,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('drawingCanvas');
     const ctx = canvas.getContext('2d');
     const clearButton = document.getElementById('clearCanvas');
-    const colorPicker = document.getElementById('colorPicker');
     const brushSize = document.getElementById('brushSize');
     const smoothingSlider = document.getElementById('smoothingFactor');
     const statusText = document.getElementById('statusText');
     const debugMode = document.getElementById('debugMode');
     const mirrorMode = document.getElementById('mirrorMode');
+    
+    // Help Modal Elements
+    const helpButton = document.getElementById('helpButton');
+    const helpModal = document.getElementById('helpModal');
+    const closeModal = document.getElementById('closeModal');
+    
+    // Show Help Modal
+    helpButton.addEventListener('click', () => {
+        helpModal.style.display = 'block';
+    });
+    
+    // Close Help Modal
+    closeModal.addEventListener('click', () => {
+        helpModal.style.display = 'none';
+    });
+    
+    // Close Modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === helpModal) {
+            helpModal.style.display = 'none';
+        }
+    });
+    
+    // Close Modal with Escape key
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && helpModal.style.display === 'block') {
+            helpModal.style.display = 'none';
+        }
+    });
+    
+    // Color palette
+    const colors = [
+        '#000000', // Black
+        '#FFFFFF', // White
+        '#FF0000', // Red
+        '#00FF00', // Green
+        '#0000FF', // Blue
+        '#FFFF00', // Yellow
+        '#FF00FF', // Magenta
+        '#00FFFF', // Cyan
+        '#FFA500', // Orange
+        '#800080'  // Purple
+    ];
+    let currentColor = colors[0]; // Default to black
+    const colorPaletteSize = 30; // Size of each color square
+    const colorPaletteMargin = 10; // Margin between color squares
+    const colorPaletteTop = 10; // Top position of the color palette
     
     // Debug canvas for hand landmarks
     const debugCanvas = document.createElement('canvas');
@@ -26,16 +72,32 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Canvas setup
     function setupCanvas() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        // Set canvas resolution to match display size for crisp rendering
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        // Set the canvas dimensions to match its CSS size * device pixel ratio
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        // Scale the context to ensure correct drawing
+        ctx.scale(dpr, dpr);
+        
+        // Set canvas CSS size
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
-        ctx.strokeStyle = colorPicker.value;
+        ctx.strokeStyle = currentColor;
         ctx.lineWidth = brushSize.value;
         
-        // Setup debug canvas
+        // Setup debug canvas with the same dimensions
         debugCanvas.width = canvas.width;
         debugCanvas.height = canvas.height;
+        debugCtx.scale(dpr, dpr);
+        debugCanvas.style.width = `${rect.width}px`;
+        debugCanvas.style.height = `${rect.height}px`;
     }
     
     // Initialize canvas
@@ -116,6 +178,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize hand detection
     initializeHandDetection();
     
+    // Draw the color palette on the canvas
+    function drawColorPalette() {
+        // Draw each color square
+        for (let i = 0; i < colors.length; i++) {
+            const x = colorPaletteMargin + i * (colorPaletteSize + colorPaletteMargin);
+            const y = colorPaletteTop;
+            
+            // Draw color square
+            ctx.fillStyle = colors[i];
+            ctx.fillRect(x, y, colorPaletteSize, colorPaletteSize);
+            
+            // Draw border (highlight current color)
+            ctx.strokeStyle = colors[i] === currentColor ? '#FFFFFF' : '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, colorPaletteSize, colorPaletteSize);
+        }
+    }
+    
+    // Check if a point is inside a color square
+    function isPointInColorPalette(x, y) {
+        if (y < colorPaletteTop || y > colorPaletteTop + colorPaletteSize) {
+            return -1; // Not in the color palette row
+        }
+        
+        for (let i = 0; i < colors.length; i++) {
+            const squareX = colorPaletteMargin + i * (colorPaletteSize + colorPaletteMargin);
+            if (x >= squareX && x <= squareX + colorPaletteSize) {
+                return i; // Return the index of the color
+            }
+        }
+        
+        return -1; // Not on any color square
+    }
+    
     // Process hand detection results
     function onResults(results) {
         // Clear debug canvas if debug mode is on
@@ -125,6 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             debugCanvas.style.display = 'none';
         }
+        
+        // Draw the color palette
+        drawColorPalette();
         
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
             const hand = results.multiHandLandmarks[0];
@@ -162,12 +261,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const isPalmDetected = thumbExtended && indexExtended && middleExtended && 
                                   ringExtended && pinkyExtended;
             
+            // Get the canvas rect and device pixel ratio for accurate coordinate mapping
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Map hand coordinates to the canvas display size (not the internal resolution)
             // Always invert the x-coordinate because MediaPipe's coordinates are mirrored
-            // compared to what we see on the canvas
-            const thumbX = (1 - thumbTip.x) * canvas.width;
-            const thumbY = thumbTip.y * canvas.height;
-            const indexX = (1 - indexTip.x) * canvas.width;
-            const indexY = indexTip.y * canvas.height;
+            const thumbX = (1 - thumbTip.x) * rect.width;
+            const thumbY = thumbTip.y * rect.height;
+            const indexX = (1 - indexTip.x) * rect.width;
+            const indexY = indexTip.y * rect.height;
             
             // Calculate hand size for reference
             const middleMCP = hand[9];
@@ -184,10 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Using 2D distance for more reliable pinch detection
             const isPinching = distance2D < pinchThreshold;
             
-            // Handle palm detection for eraser mode
-            if (isPalmDetected) {
+            // Define a threshold for fingers being far apart
+            const fingersApartThreshold = 0.3; // Larger threshold for fingers being far apart
+            
+            // Check if thumb and index finger are far apart (for eraser mode)
+            const isFingersApart = distance2D > fingersApartThreshold;
+            
+            // Handle palm detection for eraser mode - require both palm detection AND fingers being far apart
+            if (isPalmDetected && isFingersApart) {
                 if (!palmDetectedTime) {
-                    // Start the timer when palm is first detected
+                    // Start the timer when palm is first detected with fingers apart
                     palmDetectedTime = Date.now();
                 } else if (Date.now() - palmDetectedTime >= palmDetectionDelay) {
                     // Activate eraser mode after delay
@@ -200,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                // Reset palm detection timer if palm is not detected
+                // Reset palm detection timer if palm is not detected or fingers are not apart
                 palmDetectedTime = null;
             }
             
@@ -283,6 +392,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const midX = (thumbX + indexX) / 2;
             const midY = (thumbY + indexY) / 2;
             
+            // Check if the index finger is hovering over a color in the palette
+            if (!isErasing) {
+                const colorIndex = isPointInColorPalette(indexX, indexY);
+                if (colorIndex !== -1) {
+                    // Highlight the color being hovered
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    const x = colorPaletteMargin + colorIndex * (colorPaletteSize + colorPaletteMargin);
+                    ctx.strokeRect(x, colorPaletteTop, colorPaletteSize, colorPaletteSize);
+                    
+                    // Select the color on hover (no pinch required)
+                    currentColor = colors[colorIndex];
+                    ctx.strokeStyle = currentColor;
+                    
+                    // Show color selection feedback
+                    statusText.textContent = `Selected color: ${colors[colorIndex]}`;
+                    
+                    // Redraw the color palette to show the selected color
+                    drawColorPalette();
+                }
+            }
+            
             // Check if eraser has been active for too long and needs to be reset
             if (isErasing && eraserActivationTime && (Date.now() - eraserActivationTime >= eraserActiveTime)) {
                 // Reset eraser mode after the active time
@@ -312,6 +443,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // No need to draw it on the main canvas
                 }
                 
+                // Redraw the color palette after erasing
+                drawColorPalette();
+                
             } else if (isPinching) {
                 statusText.textContent = 'Pinch detected! Drawing mode active.';
                 
@@ -321,39 +455,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     unpinchTimer = null;
                 }
                 
-                // Add point to buffer
-                pointsBuffer.push({ x: midX, y: midY });
-                
-                // Keep buffer at fixed size
-                if (pointsBuffer.length > bufferSize) {
-                    pointsBuffer.shift();
-                }
-                
-                // Calculate smoothed point
-                const smoothedPoint = smoothPoints(pointsBuffer);
-                
-                if (!isDrawing) {
-                    // Start a new line
-                    isDrawing = true;
+                // Check if we're hovering over the color palette
+                const colorIndex = isPointInColorPalette(midX, midY);
+                if (colorIndex !== -1) {
+                    // Select the color
+                    currentColor = colors[colorIndex];
+                    ctx.strokeStyle = currentColor;
+                    // Redraw the color palette to show the selected color
+                    drawColorPalette();
+                } else {
+                    // Only draw if not selecting a color
+                    // Add point to buffer
+                    pointsBuffer.push({ x: midX, y: midY });
                     
-                    // If this is a new stroke (after unpinching), start a new path
-                    if (!strokeStarted) {
-                        strokeStarted = true;
+                    // Keep buffer at fixed size
+                    if (pointsBuffer.length > bufferSize) {
+                        pointsBuffer.shift();
+                    }
+                    
+                    // Calculate smoothed point
+                    const smoothedPoint = smoothPoints(pointsBuffer);
+                    
+                    if (!isDrawing) {
+                        // Start a new line
+                        isDrawing = true;
                         
-                        // Just set the starting point without drawing
-                        lastX = smoothedPoint.x;
-                        lastY = smoothedPoint.y;
+                        // If this is a new stroke (after unpinching), start a new path
+                        if (!strokeStarted) {
+                            strokeStarted = true;
+                            
+                            // Just set the starting point without drawing
+                            lastX = smoothedPoint.x;
+                            lastY = smoothedPoint.y;
+                        } else {
+                            // Continue the line with the new point
+                            drawLine(lastX, lastY, smoothedPoint.x, smoothedPoint.y);
+                            lastX = smoothedPoint.x;
+                            lastY = smoothedPoint.y;
+                        }
                     } else {
                         // Continue the line with the new point
                         drawLine(lastX, lastY, smoothedPoint.x, smoothedPoint.y);
                         lastX = smoothedPoint.x;
                         lastY = smoothedPoint.y;
                     }
-                } else {
-                    // Continue the line with the new point
-                    drawLine(lastX, lastY, smoothedPoint.x, smoothedPoint.y);
-                    lastX = smoothedPoint.x;
-                    lastY = smoothedPoint.y;
                 }
             } else {
                 // No pinch - stop drawing after a short delay to avoid accidental breaks
@@ -384,6 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // No hand detected
             isDrawing = false;
+            
+            // Still draw the color palette
+            drawColorPalette();
         }
     }
     
@@ -404,6 +552,9 @@ document.addEventListener('DOMContentLoaded', () => {
             [0, 5], [5, 9], [9, 13], [13, 17]
         ];
         
+        // Get the canvas rect for accurate coordinate mapping
+        const rect = debugCanvas.getBoundingClientRect();
+        
         // Draw connections
         debugCtx.strokeStyle = 'white';
         debugCtx.lineWidth = 2;
@@ -413,10 +564,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const end = landmarks[j];
             
             // Always invert the x-coordinate for consistent mapping
-            const startX = (1 - start.x) * debugCanvas.width;
-            const startY = start.y * debugCanvas.height;
-            const endX = (1 - end.x) * debugCanvas.width;
-            const endY = end.y * debugCanvas.height;
+            // Map to CSS pixels (not canvas internal resolution)
+            const startX = (1 - start.x) * rect.width;
+            const startY = start.y * rect.height;
+            const endX = (1 - end.x) * rect.width;
+            const endY = end.y * rect.height;
             
             debugCtx.beginPath();
             debugCtx.moveTo(startX, startY);
@@ -429,8 +581,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         for (const landmark of landmarks) {
             // Always invert the x-coordinate for consistent mapping
-            const x = (1 - landmark.x) * debugCanvas.width;
-            const y = landmark.y * debugCanvas.height;
+            // Map to CSS pixels (not canvas internal resolution)
+            const x = (1 - landmark.x) * rect.width;
+            const y = landmark.y * rect.height;
             
             debugCtx.beginPath();
             debugCtx.arc(x, y, 4, 0, Math.PI * 2);
@@ -476,10 +629,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Draw a line on the canvas
     function drawLine(x1, y1, x2, y2) {
+        ctx.save();
+        ctx.strokeStyle = currentColor;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.stroke();
+        ctx.restore();
     }
     
     // Clear canvas
@@ -489,11 +645,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isDrawing = false;
         strokeStarted = false;
         pointsBuffer.length = 0;
-    });
-    
-    // Update stroke color
-    colorPicker.addEventListener('input', () => {
-        ctx.strokeStyle = colorPicker.value;
+        
+        // Redraw the color palette
+        drawColorPalette();
     });
     
     // Update brush size
