@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Canvas - Hand Drawing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Canvas</h1>
+        <div class="canvas-container">
+            <canvas id="drawingCanvas"></canvas>
+            <video id="webcam" autoplay playsinline></video>
+        </div>
+        <div class="controls">
+            <div class="color-picker">
+                <label for="colorPicker">Color:</label>
+                <input type="color" id="colorPicker" value="#000000">
+            </div>
+            <div class="brush-size">
+                <label for="brushSize">Brush Size:</label>
+                <input type="range" id="brushSize" min="1" max="20" value="5">
+            </div>
+            <div class="smoothing">
+                <label for="smoothingFactor">Smoothing:</label>
+                <input type="range" id="smoothingFactor" min="0" max="100" value="50">
+            </div>
+            <button id="clearCanvas">Clear Canvas</button>
+            <div class="debug-toggle">
+                <label for="debugMode">Debug Mode:</label>
+                <input type="checkbox" id="debugMode">
+            </div>
+            <div class="mirror-toggle">
+                <label for="mirrorMode">Mirror Mode:</label>
+                <input type="checkbox" id="mirrorMode" checked>
+            </div>
+        </div>
+        <div class="status">
+            <p id="statusText">Loading hand detection model...</p>
+        </div>
+    </div>
+    
+    <!-- MediaPipe Hands -->
+    <!-- MediaPipe dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    
+    <script src="main.js"></script>
+</body>
+</html>
