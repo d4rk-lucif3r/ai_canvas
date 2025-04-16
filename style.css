@@ -38,6 +38,26 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    position: relative;
+}
+
+.github-link {
+    position: absolute;
+    right: 1rem;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.github-link:hover {
+    color: var(--primary-color);
+}
+
+.github-icon {
+    width: 24px;
+    height: 24px;
 }
 
 .built-with {
@@ -473,10 +493,18 @@ button:active {
 }
 
 .mobile-header {
+    position: relative;
     padding: 1rem 0;
     border-bottom: 1px solid var(--border-color);
     background-color: rgba(0, 0, 0, 0.8);
     text-align: center;
+}
+
+.mobile-header .github-link {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .mobile-header .built-with {
